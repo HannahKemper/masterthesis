@@ -1,0 +1,46 @@
+https://code.earthengine.google.com/47d697227003907ad59d9f1350bb7d1b
+
+// Import Shapefile from Botswana
+var AOI = ee.FeatureCollection("users/hannahkemperspeyer/gadm36_BWA_0");
+
+// Load ImageCollection and filter by date and boundaries.
+var dataset = ee.ImageCollection('NASA/FLDAS/NOAH01/C/GL/M/V001')
+    .filterDate('1984-12-01', '1985-02-28')
+    .filterBounds(AOI);
+
+// Select correct band
+var select = dataset.select ('Qair_f_tavg');
+    
+// calculate mean values
+var mean = select.reduce(ee.Reducer.mean());
+
+
+// Select palette 
+
+var band_viz = {
+  min: 0.0,
+  max: 0.01005,
+  opacity: 1.0,
+  palette: ["black", "blue", "purple", "cyan", "green", "yellow", "red"]
+};
+
+// Add layer to map
+//Map.addLayer(colorized, colorizedVis, 'Colorized');
+
+// Add layer to map
+Map.addLayer(
+  mean, band_viz, 'Humidity');
+
+
+// export to drive
+
+Export.image.toDrive(
+  {
+    image: mean,
+    folder: 'Uni',
+    description: '1985_3',
+    scale: 1000,    //1km
+    region: AOI,
+    maxPixels: 1493058670,
+  }
+);
